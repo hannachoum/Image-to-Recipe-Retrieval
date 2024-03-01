@@ -1,45 +1,79 @@
-import os
 import pandas as pd
-from PIL import Image
-import numpy as np
+import openai
+from transformers import pipeline
+import torch
+from tqdm import tqdm
 
-# Define the paths to your dataset
-csv_file_path = 'path/to/your/csv_file.csv'  # Update this path
-images_folder_path = 'path/to/your/images_folder'  # Update this path
 
-# Load the dataset
-df = pd.read_csv(csv_file_path)
 
-# Function to clean the Ingredients column
-def clean_ingredients(ingredients):
-    # Implement your cleaning logic here
-    cleaned = ingredients.lower()  # Example: convert to lowercase
-    # Add more cleaning steps as needed
-    return cleaned
+# Charger le fichier CSV
+df = pd.read_csv('data_recipe/Food Ingredients and Recipe Dataset with Image Name Mapping.csv')
 
-# Apply cleaning function to the Ingredients column
-df['Cleaned_Ingredients'] = df['Ingredients'].apply(clean_ingredients)
+# Assurez-vous de remplacer 'Instructions' par le nom réel de votre colonne contenant les descriptions
+colonne_descriptions = df['Instructions']
 
-# Function to preprocess images
-def preprocess_image(image_name):
-    image_path = os.path.join(images_folder_path, image_name)
-    try:
-        with Image.open(image_path) as img:
-            # Example preprocessing: resize and convert to grayscale
-            img = img.resize((128, 128)).convert('L')
-            img_array = np.array(img)
-            return img_array
-    except IOError:
-        return None
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# Example of how to preprocess and save images
-for image_name in df['Image_Name']:
-    preprocessed_img = preprocess_image(image_name)
-    if preprocessed_img is not None:
-        # Save or process your images here
-        # Example: save the preprocessed image
-        save_path = os.path.join('path/to/save/preprocessed_images', image_name)
-        Image.fromarray(preprocessed_img).save(save_path)
+summarize_description=[]
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+nb_toolong=0
 
-# Save the cleaned CSV file
-df.to_csv('path/to/save/your_cleaned_file.csv', index=False)
+
+for description in tqdm(colonne_descriptions, desc="Processing descriptions"):
+    assert isinstance(description, str) 
+    assert len(description)!=0
+
+    max = 77
+    min =10
+
+    #print(len(description))
+    
+    if len(description) < 4000:
+        if len(description) < max:
+            #print("1",len(description))
+            summarize_description.append(description)
+            #print("1")
+        else:
+            #print("2",len(description))
+            summary=summarizer(description, max_length=max, min_length=min, do_sample=False)
+            summarize_description.append(summary)
+            #print("2")
+            #print("summary",summary)
+
+
+    elif len(description)/2 <4000: 
+        #print("split to summarize")
+        #summarize_description.append(description)
+        first_part = description[0:int(len(description)/2)]
+        second_part = description[int(len(description)/2):]
+        #print("3",len(first_part),len(second_part))
+        
+        first_summary = summarizer(first_part, max_length=max, min_length=min, do_sample=False)[0]['summary_text']
+        second_summary = summarizer(second_part, max_length=max, min_length=min, do_sample=False)[0]['summary_text']
+
+        # Concaténez les deux résumés pour obtenir un seul texte de résumé
+        total_summary = first_summary + " " + second_summary
+        
+        summarize_description.append(total_summary)
+        #print("3")
+        #print(description)
+        #print("summary",total_summary)
+
+    else: 
+        #print("too long to summarize")
+        nb_toolong+=1
+        summarize_description.append(description)
+        #print("4")
+
+    
+
+
+texts_only = [item[0]['summary_text'] for item in summarize_description if isinstance(item, list) and len(item) > 0]
+
+
+df = pd.DataFrame(texts_only, columns=['Summary'])
+df.to_csv('bert_result.csv', index=False)
+
+
+print(nb_toolong,"sentences too long for bert")
+
