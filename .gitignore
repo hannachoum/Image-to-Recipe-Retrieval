@@ -1,2 +1,5 @@
-data/
+data
+clip_env/
+bad_instructions.txt
 data.zip
+Food Ingredients and Recipe Dataset with Image Name Mapping.csv
