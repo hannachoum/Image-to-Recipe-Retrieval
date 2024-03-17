@@ -6,7 +6,7 @@ import tqdm
 from tqdm import tqdm
 
 # Configurer votre clé API OpenAI
-openai.api_key = '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'
+openai.api_key = 'cle'
 
 # Lire le fichier CSV original
 df = pd.read_csv('ComputerVision_Data/Summaries/export_summary_Bert.csv')
