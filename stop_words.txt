@@ -1,0 +1,33 @@
+#ingredients_focus_stop_words
+STOP_WORDS = [
+    # Quantities and Measurements
+    "tsp", "teaspoon", "teaspoons", "tbsp", "tablespoon", "tablespoons",
+    "c", "cup", "cups", "ml", "milliliter", "milliliters", "l", "liter", "liters",
+    "g", "gram", "grams", "kg", "kilogram", "kilograms", "oz", "ounce", "ounces",
+    "lb", "pound", "pounds", "inch", "inches", "cm", "centimeter", "centimeters",
+    "mm", "millimeter", "millimeters", "gal", "gallon", "gallons", "qt", "quart", "quarts",
+    "pt", "pint", "pints", "fl", "fluid", "pinch", "pinches", "slice", "slices","chucks",
+    "package", "packages", "pack", "packs", "piece", "pieces", "bunch", "bunches",
+    "whole", "half", "halved", "total", "serving", "part", "parts", "quartered",
+    "sliced", "diced", "chopped", "minced", "crushed", "grated", "shredded",
+    "small", "medium", "large",
+    "cupg", "tbspg", "tbspml", "lbg", "size", "cupsml", "cupsg", "cupskg", "ozg",
+    
+    # Common Preparatory Terms
+    "finely", "roughly", "thinly", "thickly", "coarsely", "freshly", "fresh", "dried",
+    "peeled", "trimmed", "cored", "pitted", "melted", "softened", "patted", "packed", "tightly", 
+    "divided", "plus", "more", "less", "optional", "needed", "to", "taste", "ground", "removed",  
+    
+    # Common Ingredients that might be too generic and does not show in image
+    "salt", "salted", "unsalted", "pepper", "water", "oil", "olive", "vegetable", "sugar", "brown",
+    "sweetened", "unsweetened", "extravirgin", "ripe", 
+    "flour", "all-purpose flour", "butter", "fine", "sea",
+    
+    # Others
+    "about", "approximately", "or", "and", "quality", "goodquality", "good", "tasty", "temperature", "room",
+    "of", "into", "such", "as", "also", "a", "only", "in", "below", "above", "method", "see", "on", "between", "depending",
+    "if", "you", "have", "one", "use", "no", "with", "from", "kosher", "dry", "for", "intact", "cut", "ask", "your",
+    "butcher", "too", "it", "can", "other", "long", "the", "too", "note", "slicedsee", "blocks", "extrafirm", "yellow",
+    "reserve", "raw", "granulated", "unflavored", "seperated", "pan", "dark", "market", "fancy", "well", "buy", "go", "add", "thin", "by", "leaving", "all",
+    "bite", "bitesize", "but", "want", "out", "some", "need", "internet" "throw", "number", "up",
+]
