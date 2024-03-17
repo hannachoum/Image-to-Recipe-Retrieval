@@ -7,7 +7,7 @@ import csv
 
 # Charger le fichier CSV
 input_path = pd.read_csv('ComputerVision_Data/Food Ingredients and Recipe Dataset with Image Name Mapping.csv')
-output_csv_path = 'export_summary_Bert.csv'
+output_csv_path = '/Data/ComputerVision_Project/export_summary_Bert.csv'
 MAX_LENGTH = 77
 
 # Configuration du dispositif pour l'exécution du modèle
