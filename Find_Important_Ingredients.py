@@ -8,10 +8,10 @@ import openai
 
 # Read the CSV file
 
-input_path = pd.read_csv('ComputerVision_Data/Summaries/export_summary_Bert.csv')
-output_csv_path = 'ComputerVision_Data/Summaries/export_summary_bert_with_ingredients.csv'
+input_path = pd.read_csv('ComputerVision_Data/Summaries/Summary_Bert.csv')
+output_csv_path = 'ComputerVision_Data/Summaries/most_important_ingredients.csv'
 
-openai.api_key = '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' 
+openai.api_key = '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' 
 
 def generate_augmented_texts(prompt):
     response = openai.ChatCompletion.create(
@@ -40,28 +40,28 @@ with open(output_csv_path, mode='w', newline='', encoding='utf-8') as file:
 
     count=0
 
-    for _, row in tqdm(input_path.iterrows(), desc="Processing descriptions"):
-  
-            title = row.get('Title', '') 
-            ingredients = row.get('Ingredients', '')
-            summary = row.get('Summary')
-            image_name = row.get('Image_Name', '')  # Idem
-            cleaned_ingredients = row.get('Cleaned_Ingredients', '')  # Idem
+    for i, row in tqdm(input_path.iterrows(), desc="Processing descriptions"):
+            if i<220:
+                title = row.get('Title', '') 
+                ingredients = row.get('Ingredients', '')
+                summary = row.get('Summary')
+                image_name = row.get('Image_Name', '')  # Idem
+                cleaned_ingredients = row.get('Cleaned_Ingredients', '')  # Idem
 
-            # Find the two most important words in the ingredients column
+                # Find the two most important words in the ingredients column
 
-            prompt= "I want you to give me the two main ingredients in this list " + ingredients + ". Give me just two words."
-            top_ingredients = generate_augmented_texts(prompt)[0]
-            #print(" top ingredients",top_ingredients)
+                prompt= "I want you to give me the two main ingredients in this list " + ingredients + ". Give me just two words."
+                top_ingredients = generate_augmented_texts(prompt)[0]
+                #print(" top ingredients",top_ingredients)
 
-            swi = summary+top_ingredients
-            swi.replace(",", " ")
+                swi = top_ingredients
+                swi.replace(",", " ")
 
-            #print("summary with ingredients",swi)
-            new_row = []
+                #print("summary with ingredients",swi)
+                new_row = []
 
-            if count_tokens(swi)<=77: 
-                 writer.writerow([title,ingredients,swi,image_name,cleaned_ingredients])
-            else:
-                 writer.writerow([title,ingredients,summary,image_name,cleaned_ingredients]) 
+                if count_tokens(swi)<=77: 
+                    writer.writerow([title,ingredients,swi,image_name,cleaned_ingredients])
+                else:
+                    writer.writerow([title,ingredients,summary,image_name,cleaned_ingredients]) 
 

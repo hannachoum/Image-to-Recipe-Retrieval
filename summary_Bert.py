@@ -6,9 +6,9 @@ import torch
 import csv
 
 # Charger le fichier CSV
-input_path = pd.read_csv('ComputerVision_Data/Food Ingredients and Recipe Dataset with Image Name Mapping.csv')
-output_csv_path = '/Data/ComputerVision_Project/export_summary_Bert.csv'
-MAX_LENGTH = 77
+input_path = pd.read_csv('/users/eleves-b/2022/hanna.mergui/Computer-Vision/ComputerVision_Data/NewMapping.csv')
+output_csv_path = '/users/eleves-b/2022/hanna.mergui/Computer-Vision/ComputerVision_Data/Summaries/Summary_Bert.csv'
+MAX_LENGTH = 20
 
 # Configuration du dispositif pour l'exécution du modèle
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -17,10 +17,6 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device=0 if device == "cuda" else -1)
 nb_toolong = 0
 idx = 0
-
-# Remove rows with no image name
-input_path = input_path[input_path['Image_Name']!='#NAME?']
-
 
 def count_tokens(text):
     # Remplacer les signes de ponctuation par des espaces et diviser le texte en mots
@@ -52,7 +48,7 @@ with open(output_csv_path, mode='w', newline='', encoding='utf-8') as file:
             if len(description.split()) < MAX_LENGTH:
                 summary = description
             else:
-                summary_result = summarizer(description, max_length=MAX_LENGTH, min_length=40, do_sample=False)
+                summary_result = summarizer(description, max_length=MAX_LENGTH, min_length=2, do_sample=False)
                 # print ("summary_res", summary_result)
                 summary = summary_result[0]['summary_text']
                 # print("summary", summary)
@@ -63,18 +59,18 @@ with open(output_csv_path, mode='w', newline='', encoding='utf-8') as file:
             second_part = description[int(len(description) / 2):int(len(description))]
 
 
-            first_summary = summarizer(first_part, max_length=MAX_LENGTH, min_length=10, do_sample=False)
+            first_summary = summarizer(first_part, max_length=MAX_LENGTH, min_length=2, do_sample=False)
             #print("first 1",first_summary)
             first_summary = str(first_summary[0]['summary_text'])
             #print("first 2",first_summary)
 
-            second_summary = summarizer(second_part, max_length=MAX_LENGTH, min_length=10, do_sample=False)
+            second_summary = summarizer(second_part, max_length=MAX_LENGTH, min_length=2, do_sample=False)
             #print(second_summary)
             second_summary = str(second_summary[0]['summary_text'])
             #print(second_summary)
             summary = str(first_summary + " " + second_summary)
             #print(second_summary)
-            summary = summarizer(summary, max_length=MAX_LENGTH, min_length=10, do_sample=False)
+            summary = summarizer(summary, max_length=MAX_LENGTH, min_length=2, do_sample=False)
             summary = str(summary[0]['summary_text'])
 
         else:
