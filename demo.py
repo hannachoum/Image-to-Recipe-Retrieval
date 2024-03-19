@@ -1,5 +1,5 @@
-import tkinter as tk
-from tkinter import filedialog, messagebox, Label, PhotoImage
+from flask import Flask, request, redirect, url_for, render_template_string
+import os
 import pandas as pd
 import os
 import torch 
@@ -9,98 +9,130 @@ from PIL import Image
 import string
 import matplotlib.pyplot as plt
 
+
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(device,"device")
 
 models = clip.available_models()
 print(models)
-model, preprocess = clip.load('RN50', device,jit=False)
-
-def load_image():
-    file_path = filedialog.askopenfilename(filetypes=[("JPG Files", "*.jpg")])
-    if file_path:
-        messagebox.showinfo("Image Loaded", "Image loaded successfully!")
-    return file_path
-
-def method_1():
-    messagebox.showinfo("Method 1", "You have chosen Method 1.")
-    file_path = load_image()
-    if file_path:
-        summary_bert_f(file_path)
-
-def method_2():
-    messagebox.showinfo("Method 2", "You have chosen Method 2.")
-    #main_ingred(file_path)
-
-def method_3():
-    messagebox.showinfo("Method 3", "You have chosen Method 3.")
-    #all_ingredients(file_path)
-
-
-# Initialise la fenêtre principale
-root = tk.Tk()
-root.title("Image Processing App")
-
-# Configuration de la fenêtre pour qu'elle apparaisse au centre de l'écran
-window_width = 600
-window_height = 400
-
-# Obtenez les dimensions de l'écran
-screen_width = root.winfo_screenwidth()
-screen_height = root.winfo_screenheight()
-
-# Calculez la position x et y pour placer la fenêtre au centre
-center_x = int(screen_width/2 - window_width / 2)
-center_y = int(screen_height/2 - window_height / 2)
-
-# Définissez la taille de la fenêtre et positionnez-la
-root.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
-
-# Ajoutez de la couleur à l'arrière-plan de la fenêtre
-root.configure(bg='light blue')
-
-# Ajoutez un texte de bienvenue
-welcome_label = Label(root, text="Welcome to our project", bg='light blue', font=('Arial', 20))
-welcome_label.pack(pady=20)
-
-# Bouton pour charger une image
-load_button = tk.Button(root, text="Load JPG Image", command=load_image, bg='light grey')
-load_button.pack(pady=10)
-
-# Boutons pour les trois méthodes
-method1_button = tk.Button(root, text="Using bert summaries", command=method_1, bg='light grey')
-method1_button.pack(pady=10)
-
-method2_button = tk.Button(root, text="Using GPT4 to choose 2 main ingredients", command=method_2, bg='light grey')
-method2_button.pack(pady=10)
-
-method3_button = tk.Button(root, text="Using all ingredients", command=method_3, bg='light grey')
-method3_button.pack(pady=10)
-
-# Lancer la boucle principale de la fenêtre
-root.mainloop()
+model, preprocess = clip.load('ViT-B/32', device,jit=False)
 
 
 
+app = Flask(__name__)
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+TEMPLATE = '''
+<!doctype html>
+<html>
+<head>
+    <title>Upload and Choose</title>
+    <style>
+        body {
+            background: url('https://assets-global.website-files.com/621384900cbdd71138c16c99/65d4baa987c97ad917011d4f_Cover%20blog-1-min.jpg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        input[type="file"] {
+            margin: 20px 0;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Give me a food image and I will try to give you the recipe ! </h1>
+        <form method="post" enctype="multipart/form-data">
+            <input type="file" name="file"><br>
+            <input type="radio" name="choice" value="option1" checked> Summary with Bert <br>
+            <input type="radio" name="choice" value="option2"> 2 main ingredients with GPT 4 2<br>
+            <input type="radio" name="choice" value="option3"> All ingredients 3<br>
+            <br>
+            <input type="submit" value="Upload and Choose">
+        </form>
+        <br>
+        
+        {{ result_message }}
+    </div>
+</body>
+</html>
+'''
+
+@app.route('/', methods=['GET', 'POST'])
+def upload_file():
+    result_message = ""
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return redirect(request.url)
+        file = request.files['file']
+        choice = request.form.get('choice')
+
+        print("File part in request")
+        print("Choice selected:", choice)
+
+        """
+        if file.filename == '' or not allowed_file(file.filename):
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+        """
+
+        filepath="/users/eleves-b/2022/hanna.mergui/Computer-Vision/ComputerVision_Data/Food Images/Food Images/-bloody-mary-tomato-toast-with-celery-and-horseradish-56389813.jpg"
+        
+        file.save(filepath)
+        if choice == 'option1':
+            #result_message = "You chose option 1."
+            result_message = models(filepath,"/users/eleves-b/2022/hanna.mergui/Computer-Vision/ComputerVision_Data/Tensors_data/tensor_bert.pt")
+        elif choice == 'option2':
+            result_message = models(filepath,"/users/eleves-b/2022/hanna.mergui/Computer-Vision/ComputerVision_Data/Tensors_data/summary_ingredients_tensor.pt")
+        elif choice == 'option3':
+            result_message = models(filepath,"/users/eleves-b/2022/hanna.mergui/Computer-Vision/ComputerVision_Data/Tensors_data/Ingredients_tensor.pt")
+    return render_template_string(TEMPLATE, result_message=result_message)
 
 
 
+mapping_path = "/users/eleves-b/2022/hanna.mergui/Computer-Vision/ComputerVision_Data/NewMapping.csv"
+mapping_csv = pd.read_csv(mapping_path)
 
-def summary_bert_f(file_path):
 
-    summary_bert_path = "/users/eleves-b/2022/hanna.mergui/Computer-Vision/ComputerVision_Data/Summaries/Summary_Bert.csv"
-    summary_bert = pd.read_csv(summary_bert_path)
-    recipe = summary_bert["Summary"]
-    recipe = recipe[:200]
+def models(file_path,tensor_path):
 
-    tensor_bert = torch.load('tensor_bert.pt')
+
+    tensor_bert = torch.load(tensor_path)
     image = preprocess(Image.open(file_path)).unsqueeze(0).to(device)
 
+   
     with torch.no_grad():
     
         image_features = model.encode_image(image)
         text_features = model.encode_text(tensor_bert)
     
+    print("after no grad")
     image_features /= image_features.norm(dim=-1, keepdim=True)
     text_features /= text_features.norm(dim=-1, keepdim=True)
     similarity = (100.0 * image_features @ text_features.T).softmax(dim=-1)
@@ -108,22 +140,28 @@ def summary_bert_f(file_path):
 
     values, indices = torch.topk(similarity[0], k=5)
 
-    # Convert the tensors to numpy arrays
     values = values.cpu().numpy()
     indices = indices.cpu().numpy()
-
-    # Create a list of tuples containing the values and indices
     values_indices = list(zip(values, indices))
-
-    # Sort the list in descending order based on the values
     values_indices.sort(reverse=True)
-
-    # Extract the sorted values and indices
     sorted_values, sorted_indices = zip(*values_indices)
 
-    max_index=sorted_indices[0] #text qui correspond à l'image selon le modèle 
+    max_index=sorted_indices[0]  
 
-    # Create a label widget
-    result_label = Label(root, text=recipe[max_index], bg='light blue', font=('Arial', 16))
-    result_label.pack(pady=10)
-    print("Model Answer",recipe[max_index])
+    #print(recipe[max_index])
+    #print(max_index)
+    print (mapping_csv["Instructions"][max_index])
+    return mapping_csv["Instructions"][max_index]
+
+
+
+if __name__ == '__main__':
+    if not os.path.exists(UPLOAD_FOLDER):
+        os.makedirs(UPLOAD_FOLDER)
+    app.run(debug=True, host='0.0.0.0')
+
+
+
+
+
+
