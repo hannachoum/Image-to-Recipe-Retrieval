@@ -5,10 +5,11 @@ from tqdm import tqdm
 import torch
 import csv
 
+MAX_LENGTH = 65
+
 # Charger le fichier CSV
-input_path = pd.read_csv('/users/eleves-b/2022/hanna.mergui/Computer-Vision/ComputerVision_Data/NewMapping.csv')
-output_csv_path = '/users/eleves-b/2022/hanna.mergui/Computer-Vision/ComputerVision_Data/Summaries/Summary_Bert.csv'
-MAX_LENGTH = 20
+input_path = pd.read_csv('data/NewMapping.csv')
+output_csv_path = 'data/Summaries/Summary_Bert_%d.csv' %(MAX_LENGTH)
 
 # Configuration du dispositif pour l'exécution du modèle
 device = "cuda" if torch.cuda.is_available() else "cpu"
