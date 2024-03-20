@@ -5,3 +5,5 @@ tqdm
 git+https://github.com/openai/CLIP.git
 transformers
 matplotlib
+openai==0.28
+flask

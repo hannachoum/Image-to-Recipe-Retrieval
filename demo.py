@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(device,"device")
+data_dir = "data"
 
 models = clip.available_models()
 print(models)
@@ -83,46 +84,44 @@ TEMPLATE = '''
 </html>
 '''
 
+print('before')
+
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     result_message = ""
     if request.method == 'POST':
+        
         if 'file' not in request.files:
             return redirect(request.url)
         file = request.files['file']
+        
         choice = request.form.get('choice')
 
         print("File part in request")
         print("Choice selected:", choice)
 
-        """
-        if file.filename == '' or not allowed_file(file.filename):
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filepath = os.path.join(UPLOAD_FOLDER, file.filename)
-        """
-
-        filepath="/users/eleves-b/2022/hanna.mergui/Computer-Vision/ComputerVision_Data/Food Images/Food Images/-bloody-mary-tomato-toast-with-celery-and-horseradish-56389813.jpg"
+        filepath="data/Food Images/Food Images/-cod-with-mussels-chorizo-fried-croutons-and-saffron-mayonnaise-355204.jpg"
         
         file.save(filepath)
         if choice == 'option1':
             #result_message = "You chose option 1."
-            result_message = models(filepath,"/users/eleves-b/2022/hanna.mergui/Computer-Vision/ComputerVision_Data/Tensors_data/tensor_bert.pt")
+            print('hello')
+            result_message = models(filepath,"data/tensors/bert_tensor.pt")
         elif choice == 'option2':
-            result_message = models(filepath,"/users/eleves-b/2022/hanna.mergui/Computer-Vision/ComputerVision_Data/Tensors_data/summary_ingredients_tensor.pt")
+            result_message = models(filepath,data_dir+"/tensors/ingredients_tensor.pt")
         elif choice == 'option3':
-            result_message = models(filepath,"/users/eleves-b/2022/hanna.mergui/Computer-Vision/ComputerVision_Data/Tensors_data/Ingredients_tensor.pt")
+            result_message = models(filepath,data_dir+"/tensors/All_ingredients_tensor.pt")
     return render_template_string(TEMPLATE, result_message=result_message)
 
 
 
-mapping_path = "/users/eleves-b/2022/hanna.mergui/Computer-Vision/ComputerVision_Data/NewMapping.csv"
+mapping_path = data_dir+"/NewMapping.csv"
 mapping_csv = pd.read_csv(mapping_path)
 
 
 def models(file_path,tensor_path):
 
-
+    print('hello')
     tensor_bert = torch.load(tensor_path)
     image = preprocess(Image.open(file_path)).unsqueeze(0).to(device)
 

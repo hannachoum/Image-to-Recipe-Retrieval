@@ -11,7 +11,7 @@ import openai
 input_path = pd.read_csv('ComputerVision_Data/Summaries/Summary_Bert.csv')
 output_csv_path = 'ComputerVision_Data/Summaries/most_important_ingredients.csv'
 
-openai.api_key = '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' 
+# set openai.api_key
 
 def generate_augmented_texts(prompt):
     response = openai.ChatCompletion.create(
